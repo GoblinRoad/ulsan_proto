@@ -43,9 +43,9 @@ const RecommendedCourses: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm">
+    <div className="bg-white rounded-xl p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-800">인기 코스</h3>
+        <h3 className="text-xl font-bold text-gray-800">인기 코스</h3>
         <Link to="/popular" className="text-sm text-blue-500 font-medium hover:text-blue-600">
           전체보기 <ChevronRight className="w-4 h-4 inline-block" />
         </Link>

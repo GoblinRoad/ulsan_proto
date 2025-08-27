@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, ArrowRight, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, ChevronRight, Loader2 } from 'lucide-react';
 import { getFestivalsWithCache, FestivalInfo } from '../../../services/festivalService';
 
 const FestivalList: React.FC = () => {
@@ -63,10 +63,9 @@ const FestivalList: React.FC = () => {
           <h2 className="text-xl font-bold text-gray-800">축제/행사</h2>
           <Link
             to="/festivals"
-            className="flex items-center space-x-1 text-blue-500 hover:text-blue-600 transition-colors"
+            className="text-sm text-blue-500 font-medium hover:text-blue-600"
           >
-            <span className="text-sm font-medium">전체보기</span>
-            <ArrowRight className="w-4 h-4" />
+            전체보기 <ChevronRight className="w-4 h-4 inline-block" />
           </Link>
         </div>
 

@@ -113,9 +113,15 @@ const KakaoMap: React.FC<KakaoMapProps> = ({ center, markers, path, height = 220
         const kakao = window.kakao;
         const options = {
           center: new kakao.maps.LatLng(center.lat, center.lng),
-          level: 6
+          level: 7,
+          draggable: false, // 지도 드래그 비활성화
+          zoomable: true // 줌 기능 활성화 (핀치 줌 포함)
         };
         map = new kakao.maps.Map(containerRef.current, options);
+
+
+
+
 
         kakaoMarkers = markers.map((m, idx) => {
           // 커스텀 마커가 있으면 사용, 없으면 순서에 맞는 고래 마커 이미지 선택
@@ -236,6 +242,7 @@ const KakaoMap: React.FC<KakaoMapProps> = ({ center, markers, path, height = 220
       ) : (
         <div ref={containerRef} className="w-full h-full" />
       )}
+
     </div>
   );
 };

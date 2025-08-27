@@ -1,4 +1,5 @@
 import { getFirstSpotInfo } from './courseSpotService';
+import { cacheManager, CACHE_TTL } from '../utils/cacheManager';
 import 일산해수욕장이미지 from '../assets/spot/일산해수욕장.jpg';
 
 // 코스별 대표 이미지 매핑 (쪽빛바다여행만 특별 처리)
@@ -6,20 +7,29 @@ const COURSE_REPRESENTATIVE_IMAGES: Record<string, string> = {
   '쪽빛바다여행': 일산해수욕장이미지, // 특별히 일산해수욕장 이미지 사용
 };
 
-// 코스별 대표 이미지 캐시
+// 코스별 대표 이미지 캐시 (메모리 + localStorage)
 const courseImageCache = new Map<string, string>();
 
 // 코스의 대표 이미지를 가져오는 함수 (최적화 버전)
 export async function getCourseRepresentativeImage(courseName: string): Promise<string> {
-  // 캐시 확인
+  // 메모리 캐시 확인
   if (courseImageCache.has(courseName)) {
     return courseImageCache.get(courseName)!;
+  }
+
+  // localStorage 캐시 확인
+  const cacheKey = `course_image_${courseName}`;
+  const cached = cacheManager.get(cacheKey);
+  if (cached) {
+    courseImageCache.set(courseName, cached);
+    return cached;
   }
 
   // 쪽빛바다여행은 특별히 일산해수욕장 이미지 사용
   if (courseName === '쪽빛바다여행') {
     const imageUrl = COURSE_REPRESENTATIVE_IMAGES[courseName];
     courseImageCache.set(courseName, imageUrl);
+    cacheManager.set(cacheKey, imageUrl, CACHE_TTL.COURSE);
     return imageUrl;
   }
 
@@ -28,6 +38,7 @@ export async function getCourseRepresentativeImage(courseName: string): Promise<
     const firstSpot = await getFirstSpotInfo(courseName);
     if (firstSpot) {
       courseImageCache.set(courseName, firstSpot.image);
+      cacheManager.set(cacheKey, firstSpot.image, CACHE_TTL.COURSE);
       return firstSpot.image;
     }
   } catch (error) {
@@ -37,6 +48,7 @@ export async function getCourseRepresentativeImage(courseName: string): Promise<
   // 기본 이미지 반환
   const defaultImage = '/placeholder-image.jpg';
   courseImageCache.set(courseName, defaultImage);
+  cacheManager.set(cacheKey, defaultImage, CACHE_TTL.COURSE);
   return defaultImage;
 }
 

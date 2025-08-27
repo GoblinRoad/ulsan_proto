@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Eye, EyeOff, Loader, ArrowLeft } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import whaleToUlsanLogo from '../../assets/logo/whaleToUlsan_logo.png';
+import whaleToUlsanLogo from '../../assets/logo/whalecome_ulsan.png';
 
 const Login: React.FC = () => {
   const { signIn, signInWithKakao } = useAuth();
@@ -68,7 +68,7 @@ const Login: React.FC = () => {
           <div className="text-center mb-8">
             <img 
               src={whaleToUlsanLogo} 
-              alt="웨일투울산" 
+              alt="웨일컴울산" 
               className="w-36 h-36 object-contain mx-auto mb-0"
             />
             <p className="text-sm text-gray-500 -mt-5">추억을 남기고, 가치를 더하다</p>

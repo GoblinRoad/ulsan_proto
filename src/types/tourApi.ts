@@ -243,9 +243,6 @@ export const SIGUNGU_CODES = {
 } as const;
 
 export const CATEGORY_MAPPING = {
-    'AC': '숙박',
-    'C01': '추천코스',
-    'EV': '축제/공연/행사',
     'EX': '체험관광',
     'FD': '음식',
     'HS': '역사관광',
