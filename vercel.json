@@ -1,11 +1,28 @@
 {
+  "framework": "next.js",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://ulsantour.vercel.app:3000/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://ulsantour.vercel.app" },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://ulsantour.vercel.app"
+        },
         { "key": "Access-Control-Allow-Methods", "value": "GET,POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-Requested-With, Content-Type" }
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-Requested-With, Content-Type"
+        }
       ]
     }
   ]

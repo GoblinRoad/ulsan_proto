@@ -4,13 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:next": "next dev",
-    "build": "vite build",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "build:next": "next build",
-    "start:next": "next start"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",
