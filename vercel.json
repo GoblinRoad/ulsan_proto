@@ -1,5 +1,5 @@
 {
-  "framework": "next.js",
+  "framework": "nextjs",
   "rewrites": [
     {
       "source": "/(.*)",
