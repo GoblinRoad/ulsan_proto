@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Gift, ShoppingBag, Coffee, Utensils, Check } from 'lucide-react';
 import { useApp } from '../../../contexts/AppContext';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface RewardsListProps {
   totalCoins: number;
@@ -8,6 +9,7 @@ interface RewardsListProps {
 
 const RewardsList: React.FC<RewardsListProps> = ({ totalCoins }) => {
   const { dispatch } = useApp();
+  const { user } = useAuth();
   const [exchangedItems, setExchangedItems] = useState<Set<string>>(new Set());
 
   const rewards = [
@@ -120,6 +122,10 @@ const RewardsList: React.FC<RewardsListProps> = ({ totalCoins }) => {
                     >
                       교환하기
                     </button>
+                  ) : !user ? (
+                    <div className="text-xs text-blue-500 bg-blue-50 px-3 py-1 rounded-full">
+                      로그인 필요
+                    </div>
                   ) : (
                     <div className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
                       코인 부족

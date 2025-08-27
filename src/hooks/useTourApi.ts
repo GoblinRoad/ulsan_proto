@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TourApiResponse, TourApiItem, SIGUNGU_CODES, CATEGORY_MAPPING, CATEGORY_INFO } from '../types/tourApi';
 import { TouristSpot } from '../types/tourist';
-import {TEST_TOURIST_SPOTS} from "@/data/testData"
 
 interface UseTourApiResult {
     spots: TouristSpot[];
@@ -33,7 +32,7 @@ const useTourApi = (): UseTourApiResult => {
     };
 
     const getCategoryFromCode = (lclsSystm1: string): TouristSpot['category'] => {
-        return CATEGORY_MAPPING[lclsSystm1 as keyof typeof CATEGORY_MAPPING] || '문화관광';
+        return CATEGORY_MAPPING[lclsSystm1 as keyof typeof CATEGORY_MAPPING] || '음식';
     };
 
     const getCategoryInfo = (category: string) => {
@@ -57,7 +56,7 @@ const useTourApi = (): UseTourApiResult => {
                     address: `${item.addr1} ${item.addr2 || ''}`.trim(),
                     coins: categoryInfo.coins,
                     image: item.firstimage || item.firstimage2 || '/placeholder-image.jpg',
-                    visited: Math.random() > 0.8, // 랜덤으로 일부 방문 처리
+                    visited: false,
                     coordinates: {
                         lat: parseFloat(item.mapy),
                         lng: parseFloat(item.mapx)
@@ -80,7 +79,6 @@ const useTourApi = (): UseTourApiResult => {
 
             const baseUrl = 'https://apis.data.go.kr/B551011/KorService2/areaBasedList2';
 
-            // 모든 구의 데이터를 병렬로 가져오기
             const promises = Object.values(SIGUNGU_CODES).map(async (lDongSignguCd) => {
                 const params = new URLSearchParams({
                     serviceKey: decodeURIComponent(serviceKey),
@@ -89,8 +87,8 @@ const useTourApi = (): UseTourApiResult => {
                     MobileOS: 'WEB',
                     MobileApp: 'Ulsan',
                     _type: 'json',
-                    arrange: 'C', // 수정일순
-                    lDongRegnCd: '31', // 울산광역시
+                    arrange: 'C',
+                    lDongRegnCd: '31',
                     lDongSignguCd
                 });
 
@@ -124,10 +122,6 @@ const useTourApi = (): UseTourApiResult => {
             setError(errorMessage);
             console.error('Tour API Error:', err);
 
-            // 에러 발생 시 샘플 데이터 사용 (개발용)
-            if (import.meta.env.DEV) {
-                setSpots(TEST_TOURIST_SPOTS);
-            }
         } finally {
             setLoading(false);
         }

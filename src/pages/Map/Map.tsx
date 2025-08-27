@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
 import MapView from '@/components/Map/MapView';
 import FilterTabs from '@/components/Map/FilterTabs';
@@ -12,13 +12,40 @@ import { CategoryFilter, DistrictFilter, CategoryCounts, SpotCounts } from '@/ty
 const Map: React.FC = () => {
   const { spots, loading, error, refetch } = useTourApi();
   const [checkedInSpots, setCheckedInSpots] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
-  const [districtFilter, setDistrictFilter] = useState<DistrictFilter>('all');
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // 검색어로 필터링하는 함수
-  const searchFilter = (spot: any, term: string) => {
+  const [viewMode, setViewMode] = useState<'map' | 'list'>(() => {
+    return (sessionStorage.getItem('map_viewMode') as 'map' | 'list') || 'list';
+  });
+
+  const [districtFilter, setDistrictFilter] = useState<DistrictFilter>(() => {
+    return (sessionStorage.getItem('map_districtFilter') as DistrictFilter) || 'all';
+  });
+
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(() => {
+    return (sessionStorage.getItem('map_categoryFilter') as CategoryFilter) || 'all';
+  });
+
+  const [searchTerm, setSearchTerm] = useState(() => {
+    return sessionStorage.getItem('map_searchTerm') || '';
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('map_viewMode', viewMode);
+  }, [viewMode]);
+
+  useEffect(() => {
+    sessionStorage.setItem('map_districtFilter', districtFilter);
+  }, [districtFilter]);
+
+  useEffect(() => {
+    sessionStorage.setItem('map_categoryFilter', categoryFilter);
+  }, [categoryFilter]);
+
+  useEffect(() => {
+    sessionStorage.setItem('map_searchTerm', searchTerm);
+  }, [searchTerm]);
+
+  const searchFilter = useCallback((spot: any, term: string) => {
     if (!term) return true;
 
     const searchText = term.toLowerCase().trim();
@@ -27,48 +54,63 @@ const Map: React.FC = () => {
         spot.address.toLowerCase().includes(searchText) ||
         spot.description.toLowerCase().includes(searchText)
     );
-  };
+  }, []);
 
-  // 세 단계 필터링된 관광지 (검색 + 구별 + 카테고리)
+  const filterByCategory = useCallback((spot: any) => {
+    const excludedCategories = ['축제/공연/행사', '숙박', '추천코스', '음식'];
+
+    if (excludedCategories.includes(spot.category)) {
+      return false;
+    }
+
+    if (spot.category === '쇼핑') {
+      if (spot.name.includes('시장')) {
+        spot.category = '시장';
+        return true;
+      }
+      return false;
+    }
+
+    return true;
+  }, []);
+
   const handleCheckInComplete = useCallback((spotId: string) => {
     setCheckedInSpots(prev => new Set([...prev, spotId]));
-    // 선택적으로 전체 데이터 새로고침
-    refetch();
-  }, [refetch]);
+  }, []);
 
+  const baseFilteredSpots = useMemo(() => {
+    return spots.filter(filterByCategory);
+  }, [spots, filterByCategory]);
 
-  // 두 단계 필터링된 관광지
+  const filterKey = useMemo(() => {
+    return `${searchTerm}|${districtFilter}|${categoryFilter}`;
+  }, [searchTerm, districtFilter, categoryFilter]);
+
   const filteredSpots = useMemo(() => {
-    let filtered = spots;
+    let filtered = [...baseFilteredSpots];
 
-    // 1단계: 검색어 필터링
     if (searchTerm) {
       filtered = filtered.filter(spot => searchFilter(spot, searchTerm));
     }
 
-    // 2단계: 구별 필터링
     if (districtFilter !== 'all') {
       filtered = filtered.filter(spot => spot.district === districtFilter);
     }
 
-    // 3단계: 카테고리 필터링
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(spot => spot.category === categoryFilter);
     }
 
     return filtered;
-  }, [spots, searchTerm, districtFilter, categoryFilter]);
+  }, [baseFilteredSpots, searchTerm, districtFilter, categoryFilter, searchFilter]);
 
-  // 구별 관광지 개수 계산 (검색어 + 카테고리 필터 적용)
   const spotCounts: SpotCounts = useMemo(() => {
-    let baseFiltered = spots;
+    let baseFiltered = baseFilteredSpots;
 
-    // 검색어 필터 적용
     if (searchTerm) {
       baseFiltered = baseFiltered.filter(spot => searchFilter(spot, searchTerm));
     }
 
-    // 카테고리 필터 적용
     const categoryFiltered = categoryFilter === 'all'
         ? baseFiltered
         : baseFiltered.filter(spot => spot.category === categoryFilter);
@@ -81,18 +123,15 @@ const Map: React.FC = () => {
       buk: categoryFiltered.filter(spot => spot.district === 'buk').length,
       ulju: categoryFiltered.filter(spot => spot.district === 'ulju').length,
     };
-  }, [spots, searchTerm, categoryFilter]);
+  }, [baseFilteredSpots, searchTerm, categoryFilter, searchFilter]);
 
-  // 카테고리별 관광지 개수 계산 (검색어 + 구별 필터 적용)
   const categoryCounts: CategoryCounts = useMemo(() => {
-    let baseFiltered = spots;
+    let baseFiltered = baseFilteredSpots;
 
-    // 검색어 필터 적용
     if (searchTerm) {
       baseFiltered = baseFiltered.filter(spot => searchFilter(spot, searchTerm));
     }
 
-    // 구별 필터 적용
     const districtFiltered = districtFilter === 'all'
         ? baseFiltered
         : baseFiltered.filter(spot => spot.district === districtFilter);
@@ -103,26 +142,12 @@ const Map: React.FC = () => {
       자연관광: districtFiltered.filter(spot => spot.category === '자연관광').length,
       역사관광: districtFiltered.filter(spot => spot.category === '역사관광').length,
       체험관광: districtFiltered.filter(spot => spot.category === '체험관광').length,
-      '축제/공연/행사': districtFiltered.filter(spot => spot.category === '축제/공연/행사').length,
       레저스포츠: districtFiltered.filter(spot => spot.category === '레저스포츠').length,
-      쇼핑: districtFiltered.filter(spot => spot.category === '쇼핑').length,
-      숙박: districtFiltered.filter(spot => spot.category === '숙박').length,
+      시장: districtFiltered.filter(spot => spot.category === '시장').length,
       음식: districtFiltered.filter(spot => spot.category === '음식').length,
-      추천코스: districtFiltered.filter(spot => spot.category === '추천코스').length,
     };
-  }, [spots, searchTerm, districtFilter]);
+  }, [baseFilteredSpots, searchTerm, districtFilter, searchFilter]);
 
-  // 검색어가 있을 때 필터 초기화 함수
-  const handleSearchChange = (term: string) => {
-    setSearchTerm(term);
-    // 검색어가 입력되면 필터를 초기화하여 모든 결과를 보여줄 수 있음 (선택사항)
-    // if (term) {
-    //   setDistrictFilter('all');
-    //   setCategoryFilter('all');
-    // }
-  };
-
-  // 로딩 상태
   if (loading) {
     return (
         <div className="max-w-md mx-auto">
@@ -142,7 +167,6 @@ const Map: React.FC = () => {
     );
   }
 
-  // 에러 상태
   if (error) {
     return (
         <div className="max-w-md mx-auto">
@@ -208,7 +232,7 @@ const Map: React.FC = () => {
             <div className="mb-3">
               <SearchInput
                   searchTerm={searchTerm}
-                  setSearchTerm={handleSearchChange}
+                  setSearchTerm={setSearchTerm}
                   placeholder="관광지 이름이나 주소로 검색..."
               />
             </div>
@@ -245,21 +269,24 @@ const Map: React.FC = () => {
           </div>
         </div>
 
-        <div className="min-h-screen bg-gray-50">
-          {viewMode === 'map' ? (
-              <MapView spots={filteredSpots} />
-          ) : sessionStorage.getItem("testMode") === "true" ? (
-              <SpotList
-                  spots={TEST_TOURIST_SPOTS}
-                  onCheckInComplete={handleCheckInComplete}
-              />
-          ) : (
-              <SpotList
-                  spots={filteredSpots}
-                  onCheckInComplete={handleCheckInComplete}
-              />
-          )}
-        </div>
+        {viewMode === 'map' ? (
+            <MapView spots={filteredSpots} />
+        ) : (
+            <div className="min-h-screen bg-gray-50">
+              {sessionStorage.getItem("testMode") === "true" ? (
+                  <SpotList
+                      spots={TEST_TOURIST_SPOTS}
+                      onCheckInComplete={handleCheckInComplete}
+                  />
+              ) : (
+                  <SpotList
+                      spots={filteredSpots}
+                      onCheckInComplete={handleCheckInComplete}
+                      key={filterKey}
+                  />
+              )}
+            </div>
+        )}
       </div>
   );
 };

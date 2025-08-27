@@ -86,23 +86,23 @@ export async function getFestivals(): Promise<FestivalInfo[]> {
   }
 }
 
-// 캐시를 위한 메모리 저장소
-const festivalCache = new Map<string, FestivalInfo[]>();
+import { cacheManager, CACHE_TTL } from '../utils/cacheManager';
 
 // 캐시를 사용하는 버전
 export async function getFestivalsWithCache(): Promise<FestivalInfo[]> {
   const today = getTodayDateYYYYMMDD();
   const cacheKey = `festivals_${today}`;
   
-  // 캐시 확인
-  if (festivalCache.has(cacheKey)) {
-    return festivalCache.get(cacheKey)!;
+  // localStorage 캐시 확인
+  const cached = cacheManager.get(cacheKey);
+  if (cached) {
+    return cached;
   }
 
   const festivals = await getFestivals();
   
-  // 캐시 저장
-  festivalCache.set(cacheKey, festivals);
+  // localStorage 캐시 저장
+  cacheManager.set(cacheKey, festivals, CACHE_TTL.FESTIVAL);
   
   return festivals;
 }
@@ -259,5 +259,7 @@ export async function getFestivalImages(contentId: string): Promise<FestivalImag
 
 // 캐시 초기화 함수
 export function clearFestivalCache() {
-  festivalCache.clear();
+  const today = getTodayDateYYYYMMDD();
+  const cacheKey = `festivals_${today}`;
+  cacheManager.remove(cacheKey);
 }
