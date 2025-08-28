@@ -10,14 +10,14 @@ export class TourSpotsService {
 
     static async getTourSpotLocation(contentId: string): Promise<TourSpot | null> {
         try {
-            const response = await fetch(`/api/tour-spots?contentId=${contentId}`)
-
+            const response = await fetch(`/api/tourSpots?contentId=${contentId}`)
+            console.log(response)
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`)
             }
 
-            const data = await response.json()
-            return data.spot
+            const result = await response.json()
+            return result.data
         } catch (error) {
             console.error("관광지 위치 정보 조회 오류:", error)
             return null
