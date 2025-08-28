@@ -58,6 +58,10 @@ export interface CheckInHistory {
 export class CheckInService {
     static async submitCheckIn(data: CheckInData): Promise<CheckInResult> {
         try {
+            const token = localStorage.getItem("sb-access-token")
+            if (!token) {
+                return { success: false, message: "사용자 인증 토큰이 없습니다." }
+            }
 
             // FormData 객체 생성
             const formData = new FormData()
@@ -69,6 +73,9 @@ export class CheckInService {
 
             const response = await fetch("https://ulsan-proto-next.vercel.app/checkin", {
                 method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`, // 헤더에 토큰 추가
+                },
                 body: formData, // FormData 객체 전송
             })
 
@@ -82,27 +89,6 @@ export class CheckInService {
         }
     }
 
-    // 수정: 서버 API를 통한 중복 체크인 확인
-    static async checkIfAlreadyCheckedIn(spotId: string): Promise<boolean> {
-        try {
-
-            const response = await fetch(`/api/checkin/check?spotId=${spotId}`, {
-                method: 'GET',
-                credentials: "include",
-            })
-
-            if (!response.ok) {
-                console.error("중복 체크인 확인 API 오류:", response.status)
-                return false
-            }
-
-            const data = await response.json()
-            return data.alreadyCheckedIn || false
-        } catch (error) {
-            console.error("중복 체크인 확인 오류:", error)
-            return false
-        }
-    }
 
     // 그냥 db에 tour api를 저장하는게 나을거 같아서 생략
     // static async getAvailableSpots(userId: string) {
