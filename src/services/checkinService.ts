@@ -58,7 +58,7 @@ export interface CheckInHistory {
 export class CheckInService {
     static async submitCheckIn(data: CheckInData): Promise<CheckInResult> {
         try {
-            const token = localStorage.getItem("sb-qnxtbdixdmuhvdjtecpv-auth-token")
+            const token = JSON.parse(localStorage.getItem("sb-qnxtbdixdmuhvdjtecpv-auth-token")!).access_token
             if (!token) {
                 return { success: false, message: "사용자 인증 토큰이 없습니다." }
             }
