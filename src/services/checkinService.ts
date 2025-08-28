@@ -67,7 +67,7 @@ export class CheckInService {
             formData.append("timestamp", data.timestamp)
             formData.append("spotName", data.spotName)
 
-            const response = await fetch("/api/checkin", {
+            const response = await fetch("https://ulsan-proto-next.vercel.app/checkin", {
                 method: "POST",
                 body: formData, // FormData 객체 전송
             })
