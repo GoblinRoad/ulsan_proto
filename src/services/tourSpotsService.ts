@@ -10,7 +10,7 @@ export class TourSpotsService {
 
     static async getTourSpotLocation(contentId: string): Promise<TourSpot | null> {
         try {
-            const response = await fetch(`https://ulsan-proto-next.vercel.app/tourSpots?contentId=${contentId}`)
+            const response = await fetch(`https://ulsan-proto-next.vercel.app/api/tourSpots?contentId=${contentId}`)
             console.log(response)
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`)

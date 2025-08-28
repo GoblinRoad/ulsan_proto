@@ -71,7 +71,7 @@ export class CheckInService {
             formData.append("timestamp", data.timestamp)
             formData.append("spotName", data.spotName)
 
-            const response = await fetch("https://ulsan-proto-next.vercel.app/checkin", {
+            const response = await fetch("https://ulsan-proto-next.vercel.app/api/checkin", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`, // 헤더에 토큰 추가
