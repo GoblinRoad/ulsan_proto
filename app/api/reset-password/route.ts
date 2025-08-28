@@ -6,7 +6,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const allowedOrigins = [
-  "https://ulsantour.vercel.app",
+  "https://ulsan-proto-next.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
 ];
