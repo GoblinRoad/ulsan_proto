@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
-import { setSessionCookies, clearSessionCookies, getSessionFromCookies } from "../utils/cookieUtils";
+import {
+  setSessionCookies,
+  clearSessionCookies,
+  getSessionFromCookies,
+} from "../utils/cookieUtils";
 
 interface AuthContextType {
   user: User | null;
@@ -37,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const getSession = async () => {
       // 먼저 쿠키에서 세션 확인
       const cookieSession = getSessionFromCookies();
-      
+
       if (cookieSession) {
         setSession(cookieSession);
         setUser(cookieSession?.user ?? null);
@@ -47,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      
+
       if (session) {
         setSessionCookies(session);
         setSession(session);
@@ -58,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setSession(null);
         setUser(null);
       }
-      
+
       setLoading(false);
     };
 
@@ -89,8 +93,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       email,
       password,
     });
-    sessionStorage.setItem("testMode", "false")
-    sessionStorage.setItem("bypassLocationCheck", "false")
+    sessionStorage.setItem("testMode", "false");
+    sessionStorage.setItem("bypassLocationCheck", "false");
     return { data, error };
   };
 
@@ -117,15 +121,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       },
     });
     if (error) throw error;
-    sessionStorage.setItem("testMode", "false")
-    sessionStorage.setItem("bypassLocationCheck", "false")
+    sessionStorage.setItem("testMode", "false");
+    sessionStorage.setItem("bypassLocationCheck", "false");
   };
 
   // 로그아웃
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     clearSessionCookies();
-    sessionStorage.setItem("testMode", "false")
+    sessionStorage.setItem("testMode", "false");
     sessionStorage.setItem("bypassLocationCheck", "false");
     if (error) throw error;
   };
@@ -142,13 +146,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const resetPassword = async (email: string) => {
     try {
       // 1단계: 서버에서 사용자 검증
-      const response = await fetch('/api/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "https://ulsan-proto-next.vercel.app/api/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const result = await response.json();
 
@@ -158,20 +165,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // 2단계: 검증 통과시 클라이언트에서 이메일 발송
       if (result.canSendEmail) {
-        const { data, error } = await supabase.auth.resetPasswordForEmail(email);
-        
+        const { data, error } = await supabase.auth.resetPasswordForEmail(
+          email
+        );
+
         if (error) {
-          return { data: null, error: { message: "이메일 발송 중 오류가 발생했습니다." } };
+          return {
+            data: null,
+            error: { message: "이메일 발송 중 오류가 발생했습니다." },
+          };
         }
-        
-        return { data: { message: "비밀번호 재설정 이메일이 발송되었습니다." }, error: null };
+
+        return {
+          data: { message: "비밀번호 재설정 이메일이 발송되었습니다." },
+          error: null,
+        };
       }
 
       return { data: result, error: null };
     } catch (error) {
-      return { 
-        data: null, 
-        error: { message: "네트워크 오류가 발생했습니다." } 
+      return {
+        data: null,
+        error: { message: "네트워크 오류가 발생했습니다." },
       };
     }
   };
