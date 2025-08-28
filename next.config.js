@@ -9,7 +9,7 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
     images: {
-        domains: ["localhost", "ulsantour.vercel.app"],
+        domains: ["localhost", "ulsan-proto-next.vercel.app"],
         unoptimized: true,
     },
     async headers() {
