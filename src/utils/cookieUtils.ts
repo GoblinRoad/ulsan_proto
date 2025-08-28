@@ -8,7 +8,7 @@ export const COOKIE_NAMES = {
 
 export const COOKIE_OPTIONS = {
   secure: import.meta.env.PROD,
-  sameSite: 'lax' as const,
+  sameSite: 'None' as const,
   expires: 7, // 7일
   path: '/',
 };
